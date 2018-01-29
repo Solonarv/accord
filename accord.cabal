@@ -22,6 +22,9 @@ executable accord
   -- other-extensions:    
   build-depends:       base
                      , warp, wai, http-types
-                     , bytestring
+                     , req
+                     , bytestring, text
+                     , aeson
+                     , time
   hs-source-dirs:      src
   default-language:    Haskell2010
