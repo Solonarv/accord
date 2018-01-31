@@ -2,7 +2,7 @@
     RecordWildCards, NamedFieldPuns,
     OverloadedStrings
     #-}
-module OAuth2.OAuthListener where
+module OAuth2.Discord.OAuthListener where
 
 import Control.Concurrent
 import Control.Concurrent.MVar

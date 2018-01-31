@@ -4,7 +4,7 @@
     DataKinds,
     DeriveGeneric
     #-}
-module OAuth2.Token where
+module OAuth2.Discord.Token where
 
 import Control.Concurrent
 import Control.Concurrent.MVar
@@ -22,7 +22,7 @@ import Data.Time
 import Network.HTTP.Req
 
 import Network.HTTP.ThrowingIO
-import OAuth2.OAuthListener
+import OAuth2.Discord.OAuthListener
 
 default (Int, Text)
 

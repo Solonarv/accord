@@ -21,6 +21,7 @@ executable accord
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base
+                     , mtl
                      , warp, wai, http-types
                      , req
                      , bytestring, text

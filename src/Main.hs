@@ -1,13 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
 module Main where
 
-import OAuth2.Token
+import Framework
 
 main :: IO ()
 main = do
-    token <- retrieveOAuth2Token defaultOAuthCfg
-    loop
-  where
-    loop = print "Type `exit` to exit." >> getLine >>= \case
-      "exit" -> pure ()
-      _ -> loop
+  cfg <- retrieveAccordConfig
+  flip runReaderT cfg $ do
+    st <- initAccordState
+    flip evalStateT st $ mainLoop
+
+mainLoop :: AccordStack ()
+mainLoop = liftIO $ putStrLn "entering main loop...\naaand it's done"

@@ -8,8 +8,8 @@ import Control.Monad.IO.Class
 
 import Network.HTTP.Req
 
-newtype MonadThrowingHttp a = MonadThrowingHttp { throwingHttp :: IO a }
+newtype MonadThrowingHttp m a = MonadThrowingHttp { throwingHttp :: m a }
   deriving (Functor, Applicative, Monad, MonadIO)
 
-instance MonadHttp MonadThrowingHttp where
-  handleHttpException = MonadThrowingHttp . throwIO
+instance MonadIO m => MonadHttp (MonadThrowingHttp m) where
+  handleHttpException = MonadThrowingHttp . liftIO . throwIO
