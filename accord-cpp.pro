@@ -25,10 +25,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    connectdiscordaccountform.cpp \
+    commandlineoptions.cpp \
+    protocolhandler.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    connectdiscordaccountform.h \
+    constants.h \
+    commandlineoptions.h \
+    protocolhandler.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    connectdiscordaccountform.ui
