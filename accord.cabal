@@ -18,7 +18,14 @@ cabal-version:       >=1.10
 
 executable accord
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       Accord.ArgParse
+                     , Accord.Config
+                     , Accord.Framework
+                     , Network.HTTP.ThrowingIO
+                     , OAUth2.Discord.OAuthListener
+                     , OAuth2.Discord.Token
+                     , Paths_accord
+  autogen-modules:     Paths_accord
   -- other-extensions:    
   build-depends:       base
                      , mtl
@@ -30,5 +37,6 @@ executable accord
                      , optparse-applicative
                      , gtk
                      , hs-uri-handler
+                     , discord-hs-imp
   hs-source-dirs:      src
   default-language:    Haskell2010
