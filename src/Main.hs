@@ -1,9 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 module Main where
 
-import Graphics.UI.Gtk
+import           Graphics.UI.Gtk
 
-import Accord.Framework
+import           Accord.Framework
 
 main :: IO ()
 main = do

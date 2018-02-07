@@ -1,4 +1,4 @@
-{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE ApplicativeDo   #-}
 {-# LANGUAGE RecordWildCards #-}
 module Accord.ArgParse
   ( AccordOptions(..)
@@ -7,10 +7,10 @@ module Accord.ArgParse
   , parser, parserInfo, parseArgs
 ) where
 
-import Data.Semigroup ((<>))
+import           Data.Semigroup      ((<>))
 
-import Options.Applicative
-import qualified Data.Text as Text
+import qualified Data.Text           as Text
+import           Options.Applicative
 
 data AccordOptions = AccordOptions
   { optToken   :: TokenOption
@@ -52,7 +52,7 @@ token = rawToken <|> tokenFile
               \If this option is given, neither -r nor -f may be \
               \specified."
       )
-    tokenFile = TokenFromFile 
+    tokenFile = TokenFromFile
       <$> switch
         (  short 'r'
         <> long "force-reauth"

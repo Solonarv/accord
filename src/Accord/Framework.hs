@@ -8,20 +8,20 @@ module Accord.Framework
   , initAccordEnv
   ) where
 
-import Data.IORef
+import           Data.IORef
 
-import Control.Monad.Except
-import Control.Monad.Reader as Reader
-import Control.Monad.State  as State
+import           Control.Monad.Except
+import           Control.Monad.Reader as Reader
+import           Control.Monad.State  as State
 
-import Accord.ArgParse
-import Accord.Config
-import OAuth2.Discord.Token
+import           Accord.ArgParse
+import           Accord.Config
+import           OAuth2.Discord.Token
 
 data AccordEnv = AccordEnv
-  { aeAuthToken  :: Token
-  , aeState      :: IORef AccordState
-  , aeConfig     :: IORef AccordConfig
+  { aeAuthToken :: Token
+  , aeState     :: IORef AccordState
+  , aeConfig    :: IORef AccordConfig
   }
 
 data AccordState = Initializing
@@ -37,7 +37,10 @@ initAccordEnv args = do
   opts <- parseArgs args
   config <- retrieveAccordConfig opts
   configRef <- newIORef config
-  token <- retrieveOAuth2Token opts
+  token <- retrieveOAuth2Token OAuthCfg
+    { oauthTokenFile = optCfgFile opts
+    , oauthAppKeyFile = defaultAppKeyFile
+    }
   state0 <- initAccordState opts config >>= newIORef
   return $ AccordEnv
     { aeConfig = configRef

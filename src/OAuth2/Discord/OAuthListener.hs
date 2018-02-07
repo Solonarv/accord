@@ -1,24 +1,23 @@
-{-# LANGUAGE
-    RecordWildCards, NamedFieldPuns,
-    OverloadedStrings
-    #-}
+{-# LANGUAGE NamedFieldPuns    #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 module OAuth2.Discord.OAuthListener where
 
-import Control.Concurrent
-import Control.Concurrent.MVar
-import Control.Monad (join)
-import System.IO
+import           Control.Concurrent
+import           Control.Concurrent.MVar
+import           Control.Monad            (join)
+import           System.IO
 
-import Data.Text (Text)
-import qualified Data.Text as Text
-import Data.Text.Encoding (decodeUtf8)
-import Network.HTTP.Types
-import Network.Wai
-import Network.Wai.Handler.Warp
+import           Data.Text                (Text)
+import qualified Data.Text                as Text
+import           Data.Text.Encoding       (decodeUtf8)
+import           Network.HTTP.Types
+import           Network.Wai
+import           Network.Wai.Handler.Warp
 
 data OAuthListenerConfig = OAuthListenerConfig
-  { oalistenPort :: Port
-  , oalistenBadRequest :: FilePath
+  { oalistenPort         :: Port
+  , oalistenBadRequest   :: FilePath
   , oalistenCodeReceived :: FilePath
   }
 

@@ -1,44 +1,42 @@
-{-# LANGUAGE
-    RecordWildCards, NamedFieldPuns, LambdaCase,
-    OverloadedStrings, ExtendedDefaultRules,
-    DataKinds,
-    DeriveGeneric
-    #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE DeriveGeneric        #-}
+{-# LANGUAGE ExtendedDefaultRules #-}
+{-# LANGUAGE LambdaCase           #-}
+{-# LANGUAGE NamedFieldPuns       #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE RecordWildCards      #-}
 module OAuth2.Discord.Token where
 
-import Control.Concurrent
-import Control.Concurrent.MVar
-import Data.List (intercalate)
-import Data.Monoid ((<>))
-import GHC.Generics
-import Text.Printf
+import           Control.Concurrent
+import           Control.Concurrent.MVar
+import           Data.List                    (intercalate)
+import           Data.Monoid                  ((<>))
+import           GHC.Generics
+import           Text.Printf
 
-import Data.Aeson
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BSL
-import Data.Text (Text)
-import qualified Data.Text as Text
-import Data.Time
-import Network.HTTP.Req
+import           Data.Aeson
+import qualified Data.ByteString              as BS
+import qualified Data.ByteString.Lazy         as BSL
+import           Data.Text                    (Text)
+import qualified Data.Text                    as Text
+import           Data.Time
+import           Network.HTTP.Req
 
-import Network.HTTP.ThrowingIO
-import OAuth2.Discord.OAuthListener
+import           Network.HTTP.ThrowingIO
+import           OAuth2.Discord.OAuthListener
 
 default (Int, Text)
 
 data OAuthCfg = OAuthCfg
-  { oauthTokenFile :: FilePath
+  { oauthTokenFile  :: FilePath
   , oauthAppKeyFile :: FilePath
   } deriving Show
 
-defaultOAuthCfg :: OAuthCfg
-defaultOAuthCfg = OAuthCfg
-  { oauthTokenFile = "local/token.json"
-  , oauthAppKeyFile = "local/clientkey.json"
-  }
+defaultAppKeyFile :: FilePath
+defaultAppKeyFile = "local/clientkeys.json"
 
 data ClientKeys = ClientKeys
-  { clientID :: Text
+  { clientID     :: Text
   , clientSecret :: Text
   } deriving (Show, Generic)
 instance ToJSON ClientKeys
@@ -55,8 +53,8 @@ instance ToJSON Token
 instance FromJSON Token
 
 data TokenResponse = TokenResponse
-  { access_token :: Text
-  , expires_in :: NominalDiffTime
+  { access_token  :: Text
+  , expires_in    :: NominalDiffTime
   , refresh_token :: Text
   } deriving (Show, Generic)
 instance FromJSON TokenResponse
