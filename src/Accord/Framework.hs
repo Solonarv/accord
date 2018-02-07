@@ -37,10 +37,15 @@ initAccordEnv args = do
   opts <- parseArgs args
   config <- retrieveAccordConfig opts
   configRef <- newIORef config
-  token <- retrieveOAuth2Token OAuthCfg
-    { oauthTokenFile = optCfgFile opts
-    , oauthAppKeyFile = defaultAppKeyFile
-    }
+  token <- case optToken opts of
+    RawToken tok -> mkEphemeralToken tok
+    TokenFromFile forceReauth saveToken file ->
+      retrieveOAuth2Token OAuthCfg
+        { oauthTokenFile   = file
+        , oauthAppKeyFile  = defaultAppKeyFile
+        , oauthSaveToken   = saveToken
+        , oauthForceReauth = forceReauth
+        }
   state0 <- initAccordState opts config >>= newIORef
   return $ AccordEnv
     { aeConfig = configRef

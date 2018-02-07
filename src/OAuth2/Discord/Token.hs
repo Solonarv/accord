@@ -9,6 +9,7 @@ module OAuth2.Discord.Token where
 
 import           Control.Concurrent
 import           Control.Concurrent.MVar
+import           Control.Monad                (when)
 import           Data.List                    (intercalate)
 import           Data.Monoid                  ((<>))
 import           GHC.Generics
@@ -28,8 +29,10 @@ import           OAuth2.Discord.OAuthListener
 default (Int, Text)
 
 data OAuthCfg = OAuthCfg
-  { oauthTokenFile  :: FilePath
-  , oauthAppKeyFile :: FilePath
+  { oauthTokenFile   :: FilePath
+  , oauthAppKeyFile  :: FilePath
+  , oauthSaveToken   :: Bool
+  , oauthForceReauth :: Bool
   } deriving Show
 
 defaultAppKeyFile :: FilePath
@@ -52,6 +55,9 @@ data Token = Token
 instance ToJSON Token
 instance FromJSON Token
 
+isEphemeral :: Token -> Bool
+isEphemeral = Text.null . tokenRefresh
+
 data TokenResponse = TokenResponse
   { access_token  :: Text
   , expires_in    :: NominalDiffTime
@@ -63,31 +69,33 @@ toToken :: UTCTime -> TokenResponse -> Token
 toToken now (TokenResponse access expiry refresh)
   = Token access (addUTCTime expiry now) refresh
 
+mkEphemeralToken :: Text -> IO Token
+mkEphemeralToken tok = do
+  now <- getCurrentTime
+  return $ Token
+    { tokenAccess = tok
+    , tokenExpiry = now
+    , tokenRefresh = ""
+    }
+
 retrieveOAuth2Token :: OAuthCfg -> IO Token
 retrieveOAuth2Token cfg@OAuthCfg{..} = do
-    token <- decodeStrict <$> BS.readFile oauthTokenFile >>= \case
-      Just tok -> maybeRefresh tok
-      Nothing -> newToken
-    BS.writeFile oauthTokenFile $ BSL.toStrict $ encode token
+    token <- if oauthForceReauth
+      then newToken
+      else decodeStrict <$> BS.readFile oauthTokenFile >>= \case
+        Just tok -> maybeRefresh tok
+        Nothing -> newToken
+    when oauthSaveToken $ BS.writeFile oauthTokenFile $ BSL.toStrict $ encode token
     return token
   where
     maybeRefresh tok@Token{..} = do
       now <- getCurrentTime
-      ClientKeys{..} <- getClientKeys cfg
       if diffUTCTime tokenExpiry now < tokenRefreshThreshold
         then do
-          throwingHttp $ toToken now . responseBody <$> req
-            POST
-            (baseOAuthURL /: "token")
-            (ReqBodyUrlEnc
-              $  "client_id"     =: clientID
-              <> "client_secret" =: clientSecret
-              <> "grant_type"    =: "refresh_token"
+          keys <- getClientKeys cfg
+          tokenRequest keys
+              $  "grant_type"    =: "refresh_token"
               <> "refresh_token" =: tokenRefresh
-              <> "redirect_uri"  =: redirectURI
-            )
-            jsonResponse
-            mempty
           else return tok
     newToken = do
       authUrl <- mkOAuthURL cfg
@@ -99,20 +107,24 @@ retrieveOAuth2Token cfg@OAuthCfg{..} = do
       tid <- startOAuthListener defaultListenerConfig {oalistenPort = localPort} outvar
       code <- takeMVar outvar
       killThread tid
-      ClientKeys{..} <- getClientKeys cfg
-      now <- getCurrentTime
-      throwingHttp $ toToken now . responseBody <$> req
-        POST
-        (baseOAuthURL /: "token")
-        (ReqBodyUrlEnc
-          $  "client_id"     =: clientID
-          <> "client_secret" =: clientSecret
-          <> "grant_type"    =: "authorization_code"
+      keys <- getClientKeys cfg
+      tokenRequest keys
+          $  "grant_type"    =: "authorization_code"
           <> "code"          =: code
-          <> "redirect_uri"  =: redirectURI
-        )
-        jsonResponse
-        mempty
+
+tokenRequest :: ClientKeys -> FormUrlEncodedParam -> IO Token
+tokenRequest ClientKeys{..} kv = do
+    now <- getCurrentTime
+    throwingHttp $ toToken now . responseBody <$> req
+      POST
+      (baseOAuthURL /: "token")
+      (ReqBodyUrlEnc $ defHeaders <> kv)
+      jsonResponse
+      mempty
+  where
+    defHeaders = "client_id"     =: clientID
+              <> "client_secret" =: clientSecret
+              <> "redirect_uri"  =: redirectURI
 
 mkOAuthURL :: OAuthCfg -> IO String
 mkOAuthURL cfg = do
